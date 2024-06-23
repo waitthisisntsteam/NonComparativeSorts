@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Metrics;
 using System.Runtime.InteropServices;
 using System.Windows.Markup;
 
@@ -6,10 +7,9 @@ namespace NonComparativeSorts
 {
     class Program
     {
-        static void CountingSort(int[] values)
+        static int GetMax(int[] values)
         {
             int maxValue = values[0];
-            int minValue = values[0];
 
             foreach (var num in values)
             {
@@ -17,11 +17,29 @@ namespace NonComparativeSorts
                 {
                     maxValue = num;
                 }
+            }
+
+            return maxValue;
+        }
+        static int GetMin(int[] values) 
+        {
+            int minValue = values[0];
+
+            foreach (var num in values)
+            {
                 if (minValue > num)
                 {
                     minValue = num;
                 }
             }
+
+            return minValue;
+        }
+
+        static void CountingSort(int[] values)
+        {
+            int maxValue = GetMax(values);
+            int minValue = GetMin(values);
 
             int[] counts = new int[maxValue - minValue + 1];
             foreach (var num in values)
@@ -43,6 +61,14 @@ namespace NonComparativeSorts
         interface IKeyable
         {
             int Key { get; }
+        }
+        class KeyableString : IKeyable
+        {
+            string myString;
+
+            public int Key => myString.Length;
+
+            public static implicit operator KeyableString(string str) => new KeyableString() { myString = str };
         }
         static void PigeonHoleSort<T>(T[] values) where T : IKeyable
         {
@@ -81,13 +107,93 @@ namespace NonComparativeSorts
                 }
             }
         }
-        class KeyableString : IKeyable
+      
+        static List<int> InsertionSort (List<int> values)
         {
-            string myString;
+            if (values.Count < 2)
+            {
+                return values;
+            }
+            var sorted = new List<int>();
+            for (int i = 0; i < values.Count; i++)
+            {
+                sorted.Add(values[i]);
+                for (int j = sorted.Count - 1; j > 1; j--)
+                {
+                    if (sorted[j] < sorted[j - 1])
+                    {
+                        int temp = sorted[j];
+                        sorted[j] = sorted[j - 1];
+                        sorted[j - 1] = temp;
+                    }
+                }
+            }
 
-            public int Key => myString.Length - (myString.Length > 0? myString[0]: 1000000);
+            return sorted;
+        }
+        static void BucketSort(int[] values)
+        {
+            int maxValue = GetMax(values);
+            int minValue = GetMin(values);
 
-            public static implicit operator KeyableString(string str) => new KeyableString() { myString = str };
+            List<int>[] buckets = new List<int>[((maxValue - minValue)/values.Length) + 1];
+            for (int i = 0; i < buckets.Length; i++)
+            {
+                buckets[i] = new List<int>();
+            }
+            foreach (var num in values)
+            {
+                buckets[num/values.Length].Add(num);
+            }
+
+            for (int i = 0; i < buckets.Length; i++)
+            {
+                buckets[i] = InsertionSort(buckets[i]);
+            }
+
+            int n = 0;
+            foreach (var bucket in buckets)
+            {
+                foreach (var item in bucket)
+                {
+                    values[n] = item;
+                    n++;
+                }
+            }
+        }
+
+        static void RadixSort(int[] values)
+        {
+            int maxValue = GetMax(values);
+            int minValue = GetMin(values);
+
+            int[] buckets = new int[10];
+            foreach (var num in values)
+            {
+                int digit = num % 10;
+                buckets[digit]++;
+            }
+
+            int indexer = buckets[0];
+            for (int i = 1; i < buckets.Length; i++)
+            {  
+                if (buckets[i] > 0)
+                {
+                    indexer += buckets[i];
+                }
+                buckets[i] = indexer;
+            }
+
+            int n = values.Length-1;
+            for (int i = buckets.Length-1; i >= 0; i--)
+            {
+                values[n] = i;
+                if (i <= 1 || buckets[i] != buckets[i - 1])
+                {
+                    n--;
+                }
+            }
+            ;
         }
 
         static void Main(string[] args)
@@ -112,12 +218,31 @@ namespace NonComparativeSorts
             foreach (var num in names)
             {
                 Console.WriteLine(num.Key);
-            }
-
-            Console.ReadKey();*/
+            }*/
 
             //BucketSort test
+            /*int[] ints = { 0, 25, 13, 7, 89, 52, 3, 78, 100, 30 };
 
+            BucketSort(ints);
+
+            foreach (var num in ints)
+            {
+                Console.WriteLine(num);
+            }*/
+
+            //RadixSort test
+            int[] ints = { 100, 42, 12, 99, 884, 3 };
+
+            RadixSort(ints);
+
+            foreach (var num in ints)
+            {
+                Console.WriteLine(num);
+            }
+
+
+
+            Console.ReadKey();
         }
     }
 }
