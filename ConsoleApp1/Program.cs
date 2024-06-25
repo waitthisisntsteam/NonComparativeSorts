@@ -21,7 +21,7 @@ namespace NonComparativeSorts
 
             return maxValue;
         }
-        static int GetMin(int[] values) 
+        static int GetMin(int[] values)
         {
             int minValue = values[0];
 
@@ -107,8 +107,8 @@ namespace NonComparativeSorts
                 }
             }
         }
-      
-        static List<int> InsertionSort (List<int> values)
+
+        static List<int> InsertionSort(List<int> values)
         {
             if (values.Count < 2)
             {
@@ -136,14 +136,14 @@ namespace NonComparativeSorts
             int maxValue = GetMax(values);
             int minValue = GetMin(values);
 
-            List<int>[] buckets = new List<int>[((maxValue - minValue)/values.Length) + 1];
+            List<int>[] buckets = new List<int>[((maxValue - minValue) / values.Length) + 1];
             for (int i = 0; i < buckets.Length; i++)
             {
                 buckets[i] = new List<int>();
             }
             foreach (var num in values)
             {
-                buckets[num/values.Length].Add(num);
+                buckets[num / values.Length].Add(num);
             }
 
             for (int i = 0; i < buckets.Length; i++)
@@ -162,44 +162,49 @@ namespace NonComparativeSorts
             }
         }
 
-        static void RadixSort(int[] values)
+        static void RadixSort(int[] values, int baseVariable)
         {
             int maxValue = GetMax(values);
             int minValue = GetMin(values);
+            int range = maxValue - minValue;
+            int maxDigit = (int)Math.Log(range, baseVariable) + 1;
 
-            int[] buckets = new int[10];
-            foreach (var num in values)
+            for (int d = 0; d < maxDigit; d++)
             {
-                int digit = num % 10;
-                buckets[digit]++;
+                int[] buckets = new int[baseVariable];
+                foreach (var num in values)
+                {
+                    buckets[(num - minValue) / ((int)Math.Pow(baseVariable, d)) % baseVariable]++;
+                }
+
+                int indexer = buckets[0];
+                for (int i = 1; i < buckets.Length; i++)
+                {
+                    if (buckets[i] > 0)
+                    {
+                        indexer += buckets[i];
+                    }
+                    buckets[i] = indexer;
+                }
+
+                int[] output = new int[values.Length];
+                for (int i = values.Length - 1; i > -1; i--)
+                {
+                    output[--buckets[(values[i] - minValue) / ((int)Math.Pow(baseVariable, d)) % baseVariable]] = values[i];
+                }
+
+                for (int i = 0; i < output.Length; i++)
+                {
+                    values[i] = output[i];
+                }
             }
 
-            int indexer = buckets[0];
-            for (int i = 1; i < buckets.Length; i++)
-            {  
-                if (buckets[i] > 0)
-                {
-                    indexer += buckets[i];
-                }
-                buckets[i] = indexer;
-            }
-
-            int n = values.Length-1;
-            for (int i = buckets.Length-1; i >= 0; i--)
-            {
-                values[n] = i;
-                if (i <= 1 || buckets[i] != buckets[i - 1])
-                {
-                    n--;
-                }
-            }
-            ;
         }
 
         static void Main(string[] args)
         {
             //CountingSort test
-            /*int[] ints = { 2, 0, 1, 2, 0, 5, 1, 5, 5, 4, -5 };
+            /*int[] ints = { 2, 0, 1, 2, 0, 5, 1, 5, 5, 4, -5, -9, -3 };
 
 
             CountingSort(ints);
@@ -231,11 +236,11 @@ namespace NonComparativeSorts
             }*/
 
             //RadixSort test
-            int[] ints = { 100, 42, 12, 99, 884, 3 };
+            int[] intsR = { 100, 42, 12, 99, 884, 3, 70, 10, 50, -5 };
 
-            RadixSort(ints);
+            RadixSort(intsR, 7);
 
-            foreach (var num in ints)
+            foreach (var num in intsR)
             {
                 Console.WriteLine(num);
             }
