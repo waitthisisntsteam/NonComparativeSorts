@@ -130,7 +130,7 @@ namespace NonComparativeSorts
         static void PigeonHoleSort<T>(T[] values) where T : IKeyable
         {
             int maxValue = GetMax(values);
-            int minValue = GetMax(values);
+            int minValue = GetMin(values);
 
             List<T>[] buckets = new List<T>[maxValue - minValue + 1];
             for (int i = 0; i < buckets.Length; i++)
