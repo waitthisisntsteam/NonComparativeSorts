@@ -36,6 +36,20 @@ namespace NonComparativeSorts
 
             return maxValue;
         }
+        static int GetMax(string[] values)
+        {
+            int maxValue = values[0].Length;
+
+            foreach (var num in values)
+            {
+                if (maxValue.CompareTo(num.Length) < 0)
+                {
+                    maxValue = num.Length;
+                }
+            }
+
+            return maxValue;
+        }
         static int GetMin<T>(T[] values) where T : IKeyable
         {
             int minValue = values[0].Key;
@@ -59,6 +73,20 @@ namespace NonComparativeSorts
                 if (minValue > num)
                 {
                     minValue = num;
+                }
+            }
+
+            return minValue;
+        }
+        static int GetMin(string[] values)
+        {
+            int minValue = values[0].Length;
+
+            foreach (var num in values)
+            {
+                if (minValue.CompareTo(num.Length) > 0)
+                {
+                    minValue = num.Length;
                 }
             }
 
@@ -216,27 +244,23 @@ namespace NonComparativeSorts
                 }
             }
         }
-
-        class AlphabetKey : IKeyable
+        static void PostmanSort(string[] values)
         {
-            string myString;
-            public int Key => myString[0] - 97;
+            int maxDigit = GetMax(values);
 
-            public static implicit operator AlphabetKey(string str) => new AlphabetKey() { myString = str };
-        }
-        static void PostmanSort<T>(T[] values) where T : IKeyable
-        {
-            int maxValue = GetMax(values);
-            int minValue = GetMin(values);
-            int range = maxValue - minValue;
-            int maxDigit = (int)Math.Log(range, 26) + 1;
-
-            for (int d = 0; d < maxDigit; d++)
+            for (int d = maxDigit - 1; d > -1; d--)
             {
-                int[] buckets = new int[26];
+                int[] buckets = new int[27];
                 foreach (var num in values)
                 {
-                    buckets[(num.Key - minValue) / ((int)Math.Pow(26, d)) % 26]++;
+                    if (d < num.Length)
+                    {
+                        buckets[num[d] - 97 + 1]++;
+                    }
+                    else
+                    {
+                        buckets[0]++;
+                    }
                 }
 
                 int indexer = buckets[0];
@@ -249,10 +273,10 @@ namespace NonComparativeSorts
                     buckets[i] = indexer;
                 }
 
-                T[] output = new T[values.Length];
+                string[] output = new string[values.Length];
                 for (int i = values.Length - 1; i > -1; i--)
                 {
-                    output[--buckets[(values[i].Key - minValue) / ((int)Math.Pow(26, d)) % 26]] = values[i];
+                    output[--buckets[values[i].Length - 1 >= d ? values[i][d] - 97 + 1 : 0]] = values[i];
                 }
 
                 for (int i = 0; i < output.Length; i++)
@@ -260,8 +284,6 @@ namespace NonComparativeSorts
                     values[i] = output[i];
                 }
             }
-
-            ;
         }
 
         static void Main(string[] args)
@@ -309,7 +331,7 @@ namespace NonComparativeSorts
             }*/
 
             //PostmanSort test
-            AlphabetKey[] strings = { "bob", "let", "joe", "abc", "bac", "zed"};
+            string[] strings = { "bob", "let", "joe", "abc", "bac", "zed", "steve", "john" };
 
             PostmanSort(strings);
             foreach (var str in strings)
